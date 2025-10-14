@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/auth_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -9,19 +10,31 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _firstNameController = TextEditingController(text: 'Taha');
-  final _lastNameController = TextEditingController(text: 'Houda');
-  final _usernameController = TextEditingController(text: '@Taha098');
-  final _emailController = TextEditingController(text: 'Taha098@kfshrc.edu.sa');
+  late final TextEditingController _fullNameController;
+  late final TextEditingController _usernameController;
+  late final TextEditingController _emailController;
   final _phoneController = TextEditingController(text: '+966 5');
 
   String _selectedBirth = 'Birth';
   String _selectedGender = 'Gender';
 
   @override
+  void initState() {
+    super.initState();
+    _fullNameController = TextEditingController(
+      text: AuthService.getDisplayName(),
+    );
+    _usernameController = TextEditingController(
+      text: '@${AuthService.getCurrentUsername()}',
+    );
+    _emailController = TextEditingController(
+      text: AuthService.currentEmail ?? 'user@email.com',
+    );
+  }
+
+  @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
+    _fullNameController.dispose();
     _usernameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
@@ -57,7 +70,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () async {
+                      await AuthService.logout();
+                      if (!context.mounted) return;
+                      Navigator.popUntil(context, (route) => route.isFirst);
+                    },
                     child: const Text(
                       'logout',
                       style: TextStyle(color: Colors.black87, fontSize: 16),
@@ -127,14 +144,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                       const SizedBox(height: 30),
 
-                      // First Name
-                      _buildLabel('First Name'),
-                      _buildTextField(_firstNameController, 'Taha'),
-                      const SizedBox(height: 20),
-
-                      // Last Name
-                      _buildLabel('Last Name'),
-                      _buildTextField(_lastNameController, 'Houda'),
+                      // Full Name
+                      _buildLabel('Full Name'),
+                      _buildTextField(
+                        _fullNameController,
+                        'Enter your full name',
+                      ),
                       const SizedBox(height: 20),
 
                       // Username

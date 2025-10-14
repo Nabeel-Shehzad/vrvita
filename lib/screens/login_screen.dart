@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'auth/signup_screen.dart';
+import 'auth/biometric_login_screen.dart';
 import 'auth/login_credentials_screen.dart';
+import '../services/auth_state_service.dart';
 
 class LoginScreen extends StatelessWidget {
   final String role;
@@ -97,15 +99,32 @@ class LoginScreen extends StatelessWidget {
                     SizedBox(
                       height: 55,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           print('Log in button pressed'); // Debug print
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  LoginCredentialsScreen(role: role),
-                            ),
-                          );
+
+                          // Check if user has logged in before
+                          final hasLoggedInBefore =
+                              await AuthStateService.hasLoggedInBefore();
+
+                          if (hasLoggedInBefore) {
+                            // Returning user - show biometric login
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    BiometricLoginScreen(role: role),
+                              ),
+                            );
+                          } else {
+                            // First time user - show traditional login
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    LoginCredentialsScreen(role: role),
+                              ),
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF7BA5D8),

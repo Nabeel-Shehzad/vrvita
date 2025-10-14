@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/auth_service.dart';
 
 class DoctorProfileWithTabsScreen extends StatefulWidget {
   const DoctorProfileWithTabsScreen({super.key});
@@ -52,7 +53,9 @@ class _DoctorProfileWithTabsScreenState
                     ),
                   ),
                   TextButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      await AuthService.logout();
+                      if (!context.mounted) return;
                       Navigator.popUntil(context, (route) => route.isFirst);
                     },
                     child: const Text(
@@ -210,9 +213,9 @@ class _DoctorProfileWithTabsScreenState
               color: const Color(0xFFE8EEF5),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Text(
-              'Dr. Taha Houda Specializedin In Critical Intelligence, Robotics, And Computer Vision With Applications In Healthcare And Medical Training. He Has Collaborated With King Faisal Specialist Hospital On AI-Based Cancer Detection And VR-Based Surgical Training. His Research Also Includes Patient Ai Autonomous Robotic Inspection And Assistive Navigation Systems, Contributing To Advancements In Medical Technology And Patient Care.',
-              style: TextStyle(
+            child: Text(
+              'Dr. ${AuthService.getDisplayName()} Specialized in Critical Intelligence, Robotics, And Computer Vision With Applications In Healthcare And Medical Training. They Have Collaborated With King Faisal Specialist Hospital On AI-Based Cancer Detection And VR-Based Surgical Training. Their Research Also Includes Patient AI Autonomous Robotic Inspection And Assistive Navigation Systems, Contributing To Advancements In Medical Technology And Patient Care.',
+              style: const TextStyle(
                 fontSize: 13,
                 height: 1.5,
                 color: Colors.black87,

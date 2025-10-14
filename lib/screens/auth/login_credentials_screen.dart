@@ -29,12 +29,18 @@ class _LoginCredentialsScreenState extends State<LoginCredentialsScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  void _handleLogin() async {
     final email = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
-    // Validate with hardcoded credentials
-    if (AuthService.validateLogin(widget.role, email, password)) {
+    // Validate with hardcoded credentials and save login state
+    final isValid = await AuthService.validateLogin(
+      widget.role,
+      email,
+      password,
+    );
+
+    if (isValid) {
       // Navigate to appropriate home screen based on role
       Widget homeScreen;
       switch (widget.role.toLowerCase()) {

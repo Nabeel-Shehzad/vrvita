@@ -4,6 +4,7 @@ import '../doctor/doctor_profile_tabs_screen.dart';
 import '../doctor/appointments_screen.dart';
 import '../doctor/contact_us_screen.dart';
 import '../doctor/settings_screen.dart' as doctor_settings;
+import '../../services/auth_service.dart';
 
 class DoctorHomeScreen extends StatefulWidget {
   const DoctorHomeScreen({super.key});
@@ -113,8 +114,11 @@ class DoctorProfileScreen extends StatelessWidget {
                     top: 16,
                     right: 16,
                     child: TextButton(
-                      onPressed: () {
-                        // TODO: Implement logout
+                      onPressed: () async {
+                        // Logout and clear session
+                        await AuthService.logout();
+                        if (!context.mounted) return;
+                        // Navigate back to splash/get started screen
                         Navigator.popUntil(context, (route) => route.isFirst);
                       },
                       child: const Text(
@@ -186,9 +190,9 @@ class DoctorProfileScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      child: const Text(
-                        'Sup.Taha Houda',
-                        style: TextStyle(
+                      child: Text(
+                        AuthService.getDisplayName(),
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,

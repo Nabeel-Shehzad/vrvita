@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/auth_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -71,22 +72,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Dr. Sarah Johnson',
-                                style: TextStyle(
+                                'Dr. ${AuthService.getDisplayName()}',
+                                style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
                               ),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text(
-                                'doctor@gmail.com',
-                                style: TextStyle(
+                                AuthService.currentEmail ?? 'user@email.com',
+                                style: const TextStyle(
                                   fontSize: 14,
                                   color: Colors.white70,
                                 ),

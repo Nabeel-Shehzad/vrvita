@@ -168,31 +168,34 @@ class _SignUpPageState extends State<SignUpPage> {
     final name = _fullNameCtrl.text.trim();
     final email = _emailCtrl.text.trim();
 
-    // لو ما اختار Role → نودّيه يختار أول
-    if (globals.TypeUser.isEmpty) {
-      final before = globals.TypeUser;
-      await Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const RolePage()),
-      );
-      if (globals.TypeUser.isEmpty || globals.TypeUser == before) {
-        _showSnack(
-          "Please choose your role to continue",
-          bg: Colors.orange.shade700,
-        );
-        return;
-      }
-    }
-
-    // ✅ Navigate to OTP verification page
+    // ✅ Navigate to OTP verification page FIRST
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => OtpVerificationPage(
           email: email,
           purpose: 'signup',
-          onVerified: () {
-            // After OTP is verified, complete the signup
+          onVerified: () async {
+            // After OTP is verified, go back and then ask for role
+            Navigator.pop(context); // Close OTP page
+
+            // Now ask for role selection
+            if (globals.TypeUser.isEmpty) {
+              final before = globals.TypeUser;
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const RolePage()),
+              );
+              if (globals.TypeUser.isEmpty || globals.TypeUser == before) {
+                _showSnack(
+                  "Please choose your role to continue",
+                  bg: Colors.orange.shade700,
+                );
+                return;
+              }
+            }
+
+            // Finally complete the signup
             _completeSignup(name);
           },
         ),

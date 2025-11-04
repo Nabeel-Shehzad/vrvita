@@ -18,6 +18,9 @@ import 'role_page.dart';
 // (اختياري) صفحة تسجيل الدخول
 import 'login_page.dart';
 
+// ✅ OTP Verification
+import 'otp_verification_page.dart';
+
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -43,8 +46,12 @@ class _SignUpPageState extends State<SignUpPage> {
   final _emailRe = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
   final _fullNameRe = RegExp(r'^[A-Za-z]+\s+[A-Za-z]+.*$'); // على الأقل اسمين
   final _idRe = RegExp(r'^\d{9}$'); // 9 أرقام
-  final _phoneRe = RegExp(r'^(?:05\d{8}|\+9665\d{8}|009665\d{8})$'); // صيغ السعودية
-  final _hasSpecial = RegExp(r'''[!@#\$%^&*()\-\_=+\{\}\[\]:;"'<>,\.?\/\\|~`]''');
+  final _phoneRe = RegExp(
+    r'^(?:05\d{8}|\+9665\d{8}|009665\d{8})$',
+  ); // صيغ السعودية
+  final _hasSpecial = RegExp(
+    r'''[!@#\$%^&*()\-\_=+\{\}\[\]:;"'<>,\.?\/\\|~`]''',
+  );
 
   // Validators
   String? _vName(String? v) {
@@ -71,7 +78,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   String? _vPassword(String? v) {
     if (v == null || v.isEmpty) return 'Password is required';
-    if (v.length < 8 || v.length > 12) return 'Password must be 8–12 characters';
+    if (v.length < 8 || v.length > 12)
+      return 'Password must be 8–12 characters';
     if (!RegExp(r'[a-z]').hasMatch(v)) return 'Include lowercase letter';
     if (!RegExp(r'[A-Z]').hasMatch(v)) return 'Include uppercase letter';
     if (!RegExp(r'\d').hasMatch(v)) return 'Include number';
@@ -100,7 +108,10 @@ class _SignUpPageState extends State<SignUpPage> {
       SnackBar(
         content: Text(
           msg,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         backgroundColor: bg,
         behavior: SnackBarBehavior.floating,
@@ -117,28 +128,28 @@ class _SignUpPageState extends State<SignUpPage> {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => DoctorHomePage(userName: name)),
-              (r) => false,
+          (r) => false,
         );
         return;
       case "student":
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => StudentHomePage(userName: name)),
-              (r) => false,
+          (r) => false,
         );
         return;
       case "nurse":
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => NurseHomePage(userName: name)),
-              (r) => false,
+          (r) => false,
         );
         return;
       case "supervisor":
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => SupervisorHomePage(userName: name)),
-              (r) => false,
+          (r) => false,
         );
         return;
       default:
@@ -155,6 +166,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
 
     final name = _fullNameCtrl.text.trim();
+    final email = _emailCtrl.text.trim();
 
     // لو ما اختار Role → نودّيه يختار أول
     if (globals.TypeUser.isEmpty) {
@@ -164,17 +176,38 @@ class _SignUpPageState extends State<SignUpPage> {
         MaterialPageRoute(builder: (_) => const RolePage()),
       );
       if (globals.TypeUser.isEmpty || globals.TypeUser == before) {
-        _showSnack("Please choose your role to continue", bg: Colors.orange.shade700);
+        _showSnack(
+          "Please choose your role to continue",
+          bg: Colors.orange.shade700,
+        );
         return;
       }
     }
 
+    // ✅ Navigate to OTP verification page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OtpVerificationPage(
+          email: email,
+          purpose: 'signup',
+          onVerified: () {
+            // After OTP is verified, complete the signup
+            _completeSignup(name);
+          },
+        ),
+      ),
+    );
+  }
+
+  void _completeSignup(String name) {
     // ✅ ثبّت حالة الحساب والجلسة + البيانات محليًا
-    globals.isSignedUp = true;                       // صار عنده حساب
-    globals.isLoggedIn = true;                       // جلسة فعّالة الآن
-    globals.userDisplayName = name;                  // الاسم
-    globals.registeredId = _idCtrl.text.trim();      // رقم المستخدم (9 أرقام)
-    globals.biometricEnabled = true;                 // فعّل البصمة لمرات الدخول القادمة (اختياري)
+    globals.isSignedUp = true; // صار عنده حساب
+    globals.isLoggedIn = true; // جلسة فعّالة الآن
+    globals.userDisplayName = name; // الاسم
+    globals.registeredId = _idCtrl.text.trim(); // رقم المستخدم (9 أرقام)
+    globals.biometricEnabled =
+        true; // فعّل البصمة لمرات الدخول القادمة (اختياري)
     globals.TypeUser = globals.TypeUser.trim().toLowerCase(); // تأكيد الدور
 
     // رسالة نجاح
@@ -207,7 +240,11 @@ class _SignUpPageState extends State<SignUpPage> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back, color: SignUpPage.dark, size: 28),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: SignUpPage.dark,
+                            size: 28,
+                          ),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ),
@@ -245,7 +282,9 @@ class _SignUpPageState extends State<SignUpPage> {
                         icon: Icons.perm_identity,
                         validator: _vId,
                         keyboard: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: 12),
@@ -288,12 +327,18 @@ class _SignUpPageState extends State<SignUpPage> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: SignUpPage.dark,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                           onPressed: _submit,
                           child: const Text(
                             'Sign up',
-                            style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.w700),
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ),
@@ -301,16 +346,27 @@ class _SignUpPageState extends State<SignUpPage> {
                       const SizedBox(height: 18),
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage()));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const LoginPage(),
+                            ),
+                          );
                         },
                         child: RichText(
                           text: TextSpan(
                             text: 'Have an account? ',
-                            style: const TextStyle(color: Colors.black54, fontSize: 14),
+                            style: const TextStyle(
+                              color: Colors.black54,
+                              fontSize: 14,
+                            ),
                             children: [
                               TextSpan(
                                 text: 'Log in',
-                                style: TextStyle(color: SignUpPage.dark, fontWeight: FontWeight.w700),
+                                style: TextStyle(
+                                  color: SignUpPage.dark,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ],
                           ),
@@ -319,7 +375,10 @@ class _SignUpPageState extends State<SignUpPage> {
                       const SizedBox(height: 8),
                       Text(
                         "Role: ${globals.TypeUser.isEmpty ? "Not selected" : globals.TypeUser}",
-                        style: const TextStyle(color: Colors.black45, fontSize: 12),
+                        style: const TextStyle(
+                          color: Colors.black45,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -420,7 +479,10 @@ class _Field extends StatelessWidget {
         fillColor: SignUpPage.fieldFill,
         prefixIcon: Icon(icon, color: SignUpPage.dark),
         isDense: false,
-        contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 18,
+          horizontal: 14,
+        ),
         enabledBorder: _b(SignUpPage.fieldBorder),
         focusedBorder: _b(SignUpPage.dark),
         errorBorder: _b(Colors.red),

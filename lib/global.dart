@@ -18,6 +18,11 @@ String registeredId = '';
 /// الاسم المعروض للمستخدم بعد التسجيل/الدخول
 String userDisplayName = '';
 
+/// معلومات إضافية للملف الشخصي
+String? userEmail;
+String? userPhone;
+String? userBio;
+
 /// هل فضّل المستخدم الدخول بالبصمة (Face/Touch ID)؟
 bool biometricEnabled = false;
 
@@ -25,7 +30,7 @@ bool biometricEnabled = false;
 /// لا تلمس isSignedUp حتى لا يُطلَب Sign Up من جديد.
 /// امسح معلومات الجلسة وما يحتاج يُعاد كل مرة.
 void resetSession() {
-  isLoggedIn = false;   // خرج من الجلسة
+  isLoggedIn = false; // خرج من الجلسة
   // ممكن تفضلي تُبقي الدور والاسم حسب تصميمك:
   // TypeUser = '';      // ← امسحيه فقط إذا تبين إجبار اختيار الدور كل مرة
   // userDisplayName = '';
@@ -35,10 +40,9 @@ void resetSession() {
 /// إعادة التهيئة الكاملة (استخدميها فقط لو تبين مسح الحساب كليًا)
 void resetAllAccount() {
   TypeUser = '';
-  isSignedUp = false;     // إلغاء وجود الحساب
+  isSignedUp = false; // إلغاء وجود الحساب
   isLoggedIn = false;
   registeredId = '';
   userDisplayName = '';
   biometricEnabled = false;
 }
-

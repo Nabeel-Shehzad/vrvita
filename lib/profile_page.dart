@@ -16,6 +16,67 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  bool _isEditing = false;
+  late TextEditingController _nameController;
+  late TextEditingController _phoneController;
+  late TextEditingController _emailController;
+  late TextEditingController _bioController;
+
+  @override
+  void initState() {
+    super.initState();
+    final displayName = widget.userName.isNotEmpty
+        ? widget.userName
+        : globals.userDisplayName;
+    _nameController = TextEditingController(text: displayName);
+    _phoneController = TextEditingController(text: globals.userPhone ?? '');
+    _emailController = TextEditingController(text: globals.userEmail ?? '');
+    _bioController = TextEditingController(text: globals.userBio ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _bioController.dispose();
+    super.dispose();
+  }
+
+  void _saveProfile() {
+    // Save to globals
+    globals.userDisplayName = _nameController.text.trim();
+    globals.userPhone = _phoneController.text.trim();
+    globals.userEmail = _emailController.text.trim();
+    globals.userBio = _bioController.text.trim();
+
+    setState(() {
+      _isEditing = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Profile updated successfully!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _cancelEdit() {
+    // Reset controllers to original values
+    final displayName = widget.userName.isNotEmpty
+        ? widget.userName
+        : globals.userDisplayName;
+    _nameController.text = displayName;
+    _phoneController.text = globals.userPhone ?? '';
+    _emailController.text = globals.userEmail ?? '';
+    _bioController.text = globals.userBio ?? '';
+
+    setState(() {
+      _isEditing = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final displayName = widget.userName.isNotEmpty
@@ -28,8 +89,22 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         backgroundColor: kBrand,
         foregroundColor: Colors.white,
-        title: const Text('Profile'),
+        title: Text(_isEditing ? 'Edit Profile' : 'Profile'),
         elevation: 0,
+        actions: [
+          if (_isEditing)
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: _cancelEdit,
+              tooltip: 'Cancel',
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => setState(() => _isEditing = true),
+              tooltip: 'Edit',
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -131,107 +206,180 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 16),
 
-                  _InfoCard(
-                    icon: Icons.badge_outlined,
-                    title: 'User ID',
-                    value: globals.registeredId.isNotEmpty
-                        ? globals.registeredId
-                        : 'Not set',
-                  ),
-
-                  _InfoCard(
-                    icon: Icons.person_outline,
-                    title: 'Full Name',
-                    value: displayName,
-                  ),
-
-                  _InfoCard(
-                    icon: Icons.work_outline,
-                    title: 'Role',
-                    value: userRole,
-                  ),
-
-                  _InfoCard(
-                    icon: Icons.fingerprint,
-                    title: 'Biometric Login',
-                    value: globals.biometricEnabled ? 'Enabled' : 'Disabled',
-                    trailing: Switch(
-                      value: globals.biometricEnabled,
-                      activeColor: kBrand,
-                      onChanged: (value) {
-                        setState(() {
-                          globals.biometricEnabled = value;
-                        });
-                      },
+                  if (!_isEditing) ...[
+                    _InfoCard(
+                      icon: Icons.badge_outlined,
+                      title: 'User ID',
+                      value: globals.registeredId.isNotEmpty
+                          ? globals.registeredId
+                          : 'Not set',
                     ),
-                  ),
+                    _InfoCard(
+                      icon: Icons.person_outline,
+                      title: 'Full Name',
+                      value: displayName,
+                    ),
+                    _InfoCard(
+                      icon: Icons.email_outlined,
+                      title: 'Email',
+                      value: globals.userEmail ?? 'Not set',
+                    ),
+                    _InfoCard(
+                      icon: Icons.phone_outlined,
+                      title: 'Phone',
+                      value: globals.userPhone ?? 'Not set',
+                    ),
+                    _InfoCard(
+                      icon: Icons.work_outline,
+                      title: 'Role',
+                      value: userRole,
+                    ),
+                    _InfoCard(
+                      icon: Icons.info_outline,
+                      title: 'Bio',
+                      value: globals.userBio ?? 'Not set',
+                    ),
+                    _InfoCard(
+                      icon: Icons.fingerprint,
+                      title: 'Biometric Login',
+                      value: globals.biometricEnabled ? 'Enabled' : 'Disabled',
+                      trailing: Switch(
+                        value: globals.biometricEnabled,
+                        activeColor: kBrand,
+                        onChanged: (value) {
+                          setState(() {
+                            globals.biometricEnabled = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ] else ...[
+                    // Editable fields
+                    _EditableField(
+                      icon: Icons.person_outline,
+                      label: 'Full Name',
+                      controller: _nameController,
+                      hint: 'Enter your full name',
+                    ),
+                    _EditableField(
+                      icon: Icons.email_outlined,
+                      label: 'Email',
+                      controller: _emailController,
+                      hint: 'Enter your email',
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    _EditableField(
+                      icon: Icons.phone_outlined,
+                      label: 'Phone',
+                      controller: _phoneController,
+                      hint: 'Enter your phone number',
+                      keyboardType: TextInputType.phone,
+                    ),
+                    _EditableField(
+                      icon: Icons.info_outline,
+                      label: 'Bio',
+                      controller: _bioController,
+                      hint: 'Tell us about yourself',
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 8),
+                    // Read-only fields
+                    _InfoCard(
+                      icon: Icons.badge_outlined,
+                      title: 'User ID (Read Only)',
+                      value: globals.registeredId.isNotEmpty
+                          ? globals.registeredId
+                          : 'Not set',
+                    ),
+                    _InfoCard(
+                      icon: Icons.work_outline,
+                      title: 'Role (Read Only)',
+                      value: userRole,
+                    ),
+                  ],
 
                   const SizedBox(height: 30),
 
                   // Action Buttons
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        // Navigate to edit profile
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Edit Profile feature coming soon!'),
+                  if (_isEditing) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: _saveProfile,
+                        icon: const Icon(Icons.save),
+                        label: const Text(
+                          'Save Changes',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.edit),
-                      label: const Text(
-                        'Edit Profile',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kBrand,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kBrand,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // Change password
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Change Password feature coming soon!',
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: OutlinedButton.icon(
+                        onPressed: _cancelEdit,
+                        icon: const Icon(Icons.cancel),
+                        label: const Text(
+                          'Cancel',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.grey[700],
+                          side: BorderSide(color: Colors.grey[400]!, width: 2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          // Change password
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Change Password feature coming soon!',
+                              ),
                             ),
+                          );
+                        },
+                        icon: const Icon(Icons.lock_outline),
+                        label: const Text(
+                          'Change Password',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.lock_outline),
-                      label: const Text(
-                        'Change Password',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
                         ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: kBrand,
-                        side: const BorderSide(color: kBrand, width: 2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: kBrand,
+                          side: const BorderSide(color: kBrand, width: 2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -301,6 +449,84 @@ class _InfoCard extends StatelessWidget {
             ),
           ),
           if (trailing != null) trailing!,
+        ],
+      ),
+    );
+  }
+}
+
+class _EditableField extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final TextEditingController controller;
+  final String hint;
+  final TextInputType? keyboardType;
+  final int maxLines;
+
+  const _EditableField({
+    required this.icon,
+    required this.label,
+    required this.controller,
+    required this.hint,
+    this.keyboardType,
+    this.maxLines = 1,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: kLight.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: kBrand, size: 20),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: kBrand,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: controller,
+            keyboardType: keyboardType,
+            maxLines: maxLines,
+            decoration: InputDecoration(
+              hintText: hint,
+              filled: true,
+              fillColor: Colors.grey[50],
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: kBrand, width: 2),
+              ),
+            ),
+          ),
         ],
       ),
     );

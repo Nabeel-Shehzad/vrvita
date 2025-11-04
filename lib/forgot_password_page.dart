@@ -1,7 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'new_password_page.dart';
+import 'otp_verification_page.dart'; // ✅ Add OTP verification
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -13,8 +13,6 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  Timer? _timer;
-  int _secondsLeft = 600;
 
   static const Color dark = Color(0xFF2F5B89);
   static const Color fieldFill = Color(0xFFDCE4F0);
@@ -28,35 +26,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     return null;
   }
 
-  void _startTimer() {
-    _timer?.cancel();
-    setState(() {
-      _secondsLeft = 600;
-    });
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (_secondsLeft <= 1) {
-        t.cancel();
-        setState(() {
-          _secondsLeft = 0;
-        });
-      } else {
-        setState(() {
-          _secondsLeft--;
-        });
-      }
-    });
-  }
-
-  String _formatTime(int sec) {
-    final m = sec ~/ 60;
-    final s = sec % 60;
-    return "${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}";
-  }
-
   @override
   void dispose() {
     _emailController.dispose();
-    _timer?.cancel();
     super.dispose();
   }
 
@@ -70,7 +42,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             const _TopWedge(),
             Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 18,
+                ),
                 child: Form(
                   key: _formKey,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -80,7 +55,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back, color: dark, size: 26),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: dark,
+                            size: 26,
+                          ),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ),
@@ -88,7 +67,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       Text(
                         'Forgot Password',
                         style: GoogleFonts.quintessential(
-                          fontSize: 30, color: dark, fontWeight: FontWeight.w800,
+                          fontSize: 30,
+                          color: dark,
+                          fontWeight: FontWeight.w800,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -108,23 +89,41 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           hintText: 'example@mail.com',
                           filled: true,
                           fillColor: fieldFill,
-                          prefixIcon: const Icon(Icons.mail_outline, color: Colors.black87),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
+                          prefixIcon: const Icon(
+                            Icons.mail_outline,
+                            color: Colors.black87,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 18,
+                            horizontal: 14,
+                          ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: fieldBorder, width: 1.4),
+                            borderSide: const BorderSide(
+                              color: fieldBorder,
+                              width: 1.4,
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: dark, width: 1.4),
+                            borderSide: const BorderSide(
+                              color: dark,
+                              width: 1.4,
+                            ),
                           ),
                           errorBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Colors.red, width: 1.4),
+                            borderSide: const BorderSide(
+                              color: Colors.red,
+                              width: 1.4,
+                            ),
                           ),
                           focusedErrorBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Colors.red, width: 1.4),
+                            borderSide: const BorderSide(
+                              color: Colors.red,
+                              width: 1.4,
+                            ),
                           ),
                         ),
                       ),
@@ -135,30 +134,42 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: dark,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              _startTimer();
+                              // Navigate to OTP verification
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (_) => const NewPasswordPage()),
+                                MaterialPageRoute(
+                                  builder: (_) => OtpVerificationPage(
+                                    email: _emailController.text.trim(),
+                                    purpose: 'forgot_password',
+                                    onVerified: () {
+                                      // After OTP is verified, go to new password page
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const NewPasswordPage(),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
                               );
                             }
                           },
                           child: const Text(
-                            'Next Step',
-                            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                            'Send OTP',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Center(
-                        child: Text(
-                          _secondsLeft > 0
-                              ? "Link expires in ${_formatTime(_secondsLeft)}"
-                              : "Link expired",
-                          style: const TextStyle(color: Colors.black54, fontSize: 12),
                         ),
                       ),
                     ],
@@ -214,4 +225,3 @@ class _WedgePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-

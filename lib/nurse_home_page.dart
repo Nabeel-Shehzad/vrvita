@@ -591,7 +591,10 @@ class _MainDrawer extends StatelessWidget {
               ),
             ),
             const Divider(),
+            item(Icons.person_rounded, "Profile"),
             item(Icons.account_circle_rounded, "Account"),
+            item(Icons.settings_rounded, "Settings"),
+            const Divider(),
             item(Icons.local_library_rounded, "Training Library & Resources"),
             item(Icons.menu_book_rounded, "Tutorials"),
             item(Icons.help_outline_rounded, "FAQs"),
@@ -599,7 +602,6 @@ class _MainDrawer extends StatelessWidget {
             item(Icons.leaderboard_rounded, "Quiz Score"),
             item(Icons.notifications_active_rounded, "Notifications"),
             item(Icons.support_agent_rounded, "Contact Us"),
-            item(Icons.settings_rounded, "Settings"),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout_rounded, color: kBrand),

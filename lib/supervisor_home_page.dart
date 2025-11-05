@@ -161,7 +161,7 @@ class _SupervisorHomePageState extends State<SupervisorHomePage> {
         ),
         centerTitle: true,
       ),
-      drawer: const _MainDrawer(),
+      drawer: _MainDrawer(onOpen: _open),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
@@ -398,33 +398,25 @@ class _ServiceChipImage extends StatelessWidget {
 }
 
 class _MainDrawer extends StatelessWidget {
-  const _MainDrawer({super.key});
+  final void Function(BuildContext, String, {String? userName}) onOpen;
+  const _MainDrawer({super.key, required this.onOpen});
 
   @override
   Widget build(BuildContext context) {
-    ListTile item(
-      IconData icon,
-      String title,
-      String pageTitle, {
-      VoidCallback? onTap,
-    }) => ListTile(
-      leading: Icon(icon, color: kBrand),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600, color: kBrand),
-      ),
-      onTap:
-          onTap ??
-          () {
-            Navigator.pop(context);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => _PlaceholderPage(title: pageTitle),
-              ),
-            );
-          },
-    );
+    ListTile item(IconData icon, String title, {VoidCallback? onTap}) =>
+        ListTile(
+          leading: Icon(icon, color: kBrand),
+          title: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w600, color: kBrand),
+          ),
+          onTap:
+              onTap ??
+              () {
+                Navigator.pop(context);
+                onOpen(context, title);
+              },
+        );
 
     return Drawer(
       backgroundColor: Colors.white,
@@ -451,10 +443,12 @@ class _MainDrawer extends StatelessWidget {
               ),
             ),
             const Divider(),
-            item(Icons.account_circle_rounded, "Account", "Account"),
+            item(Icons.person_rounded, "Profile"),
+            item(Icons.account_circle_rounded, "Account"),
+            item(Icons.settings_rounded, "Settings"),
+            const Divider(),
             item(
               Icons.menu_book_rounded,
-              "Tutorials",
               "Tutorials",
               onTap: () {
                 Navigator.pop(context);
@@ -466,7 +460,6 @@ class _MainDrawer extends StatelessWidget {
             ),
             item(
               Icons.help_outline_rounded,
-              "FAQs",
               "FAQs",
               onTap: () {
                 Navigator.pop(context);
@@ -481,7 +474,6 @@ class _MainDrawer extends StatelessWidget {
             item(
               Icons.support_agent_rounded,
               "Contact Us",
-              "Contact Us",
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -494,13 +486,11 @@ class _MainDrawer extends StatelessWidget {
               },
             ),
 
-            item(Icons.settings_rounded, "Settings", "Settings"),
             const Divider(),
 
             // إضافات المشرف
             item(
               Icons.leaderboard_rounded,
-              "Quiz Scores (Team)",
               "Quiz Scores (Team)",
               onTap: () {
                 Navigator.pop(context);
@@ -516,7 +506,6 @@ class _MainDrawer extends StatelessWidget {
             item(
               Icons.assessment_rounded,
               "Team Reports",
-              "Team Reports",
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -527,7 +516,6 @@ class _MainDrawer extends StatelessWidget {
             ),
             item(
               Icons.verified_rounded,
-              "Approve Sessions",
               "Approve Sessions",
               onTap: () {
                 Navigator.pop(context);

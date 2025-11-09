@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'global.dart' as globals;
 import 'home_page.dart';
+import 'profile_detail_page.dart';
 
 const Color kBrand = Color(0xFF2F5B89);
 const Color kLight = Color(0xFF9FBEEC);
@@ -17,7 +18,6 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool notificationsEnabled = true;
   bool darkModeEnabled = false;
-  bool soundEnabled = true;
   bool autoBackupEnabled = false;
 
   @override
@@ -84,6 +84,17 @@ class _SettingsPageState extends State<SettingsPage> {
           // Account Section
           _SectionHeader(title: 'Account'),
           _SettingsTile(
+            icon: Icons.visibility_outlined,
+            title: 'View Profile',
+            subtitle: 'See your detailed profile',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileDetailPage()),
+              );
+            },
+          ),
+          _SettingsTile(
             icon: Icons.person_outline,
             title: 'Edit Profile',
             subtitle: 'Update your personal information',
@@ -107,20 +118,6 @@ class _SettingsPageState extends State<SettingsPage> {
               );
             },
           ),
-          _SettingsTile(
-            icon: Icons.fingerprint,
-            title: 'Biometric Login',
-            subtitle: globals.biometricEnabled ? 'Enabled' : 'Disabled',
-            trailing: Switch(
-              value: globals.biometricEnabled,
-              activeColor: kBrand,
-              onChanged: (value) {
-                setState(() {
-                  globals.biometricEnabled = value;
-                });
-              },
-            ),
-          ),
 
           const Divider(height: 32),
 
@@ -136,20 +133,6 @@ class _SettingsPageState extends State<SettingsPage> {
               onChanged: (value) {
                 setState(() {
                   notificationsEnabled = value;
-                });
-              },
-            ),
-          ),
-          _SettingsTile(
-            icon: Icons.volume_up_outlined,
-            title: 'Sound',
-            subtitle: soundEnabled ? 'On' : 'Off',
-            trailing: Switch(
-              value: soundEnabled,
-              activeColor: kBrand,
-              onChanged: (value) {
-                setState(() {
-                  soundEnabled = value;
                 });
               },
             ),
@@ -175,18 +158,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 );
               },
             ),
-          ),
-          _SettingsTile(
-            icon: Icons.language_outlined,
-            title: 'Language',
-            subtitle: 'English',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Language selection coming soon!'),
-                ),
-              );
-            },
           ),
 
           const Divider(height: 32),
@@ -249,16 +220,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SnackBar(
                   content: Text('Terms & Conditions coming soon!'),
                 ),
-              );
-            },
-          ),
-          _SettingsTile(
-            icon: Icons.help_outline,
-            title: 'Help & Support',
-            subtitle: 'Get help with the app',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Help & Support coming soon!')),
               );
             },
           ),
